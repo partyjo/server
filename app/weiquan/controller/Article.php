@@ -2,39 +2,32 @@
 namespace app\weiquan\controller;
 use think\Db;
 
-class Forms extends Base
+class Article extends Base
 {
     public function before()
 	{
-		$this->db = Db::name('forms');
+		$this->db = Db::name('articles');
     }
     
     public function add()
     {   
         $params = input('');
 
-        if (!isset($params['pid']) || !isset($params['cid'])) {
+        if (!isset($params['cid']) || empty($params['cid'])) {
             $this->data['code'] = 1001;
             $this->data['msg'] = '缺失类别';
             return $this->ajax($this->data);
         }
-        if (!isset($params['name']) || empty($params['name'])) {
+        if (!isset($params['title']) || empty($params['title'])) {
             $this->data['code'] = 1001;
-            $this->data['msg'] = '姓名不能为空';
+            $this->data['msg'] = '标题不能为空';
             return $this->ajax($this->data);
         }
-        if (!isset($params['mobile']) || strlen($params['mobile']) !== 11) {
-            $this->data['code'] = 1001;
-            $this->data['msg'] = '手机号格式不正确';
-            return $this->ajax($this->data);
-        }
-        if (!isset($params['needs']) || empty($params['name'])) {
+        if (!isset($params['content']) || empty($params['content'])) {
             $this->data['code'] = 1001;
             $this->data['msg'] = '诉求不能为空';
             return $this->ajax($this->data);
         }
-
-        $params['categorys'] = $params['pid'].','.$params['cid'];
         $params['create_time'] = $this->now();
         $params['update_time'] = $this->now();
 
@@ -50,6 +43,16 @@ class Forms extends Base
 
     public function update()
     {
+        $params = input('');
+        $params['update_time'] = $this->now();
+
+        if (!isset($params['id']) || empty($params['id'])) {
+            $this->data['code'] = 1001;
+            $this->data['msg'] = '对象不存在';
+            return $this->ajax($this->data);
+        }
+
+        $this->data['data'] = $this->db->update($params);
         return $this->ajax($this->data);
     }
 
@@ -71,6 +74,27 @@ class Forms extends Base
 
     public function get()
     {
+        $params = input('');
+
+        if (!isset($params['id']) || empty($params['id'])) {
+            $this->data['code'] = 1001;
+            $this->data['msg'] = '对象不存在';
+            return $this->ajax($this->data);
+        }
+
+        $map = [
+            'id' => $params['id'],
+            'status' => 1
+        ];
+
+        $res = $this->db->where($map) ->find();
+        if (!$res) {
+            $this->data['code'] = 1001;
+            $this->data['msg'] = '对象不存在';
+        } else {
+            $this->data['data'] = $res;
+        }
+        
         return $this->ajax($this->data);
     }
 
@@ -78,7 +102,7 @@ class Forms extends Base
     {
         $params = input('');
 
-        if (!isset($params['pid']) || empty($params['pid'])) {
+        if (!isset($params['cid']) || empty($params['cid'])) {
             $this->data['code'] = 1001;
             $this->data['msg'] = '缺失类别';
             return $this->ajax($this->data);
@@ -94,7 +118,13 @@ class Forms extends Base
         }
 
         $map['status'] = 1;
-        $map['pid'] = $params['pid'];
+        $map['cid'] = $params['cid'];
+        if (isset($params['title']) && !empty($params['title'])) {
+            $map['title'] = ['like','%'.$params['title'].'%'];
+        }
+        if (isset($params['author']) && !empty($params['author'])) {
+            $map['author'] = ['like','%'.$params['author'].'%'];
+        }
         
         $db = $this->db;
         $this->data['count'] = $db->where($map)->count();
@@ -104,6 +134,30 @@ class Forms extends Base
 
     public function all()
     {
+        $params = input('');
+
+        if (!isset($params['cid']) || empty($params['cid'])) {
+            $this->data['code'] = 1001;
+            $this->data['msg'] = '缺失类别';
+            return $this->ajax($this->data);
+        }
+
+        if (!isset($params['order']) || empty($params['order'])) {
+            $params['order'] = 'create_time desc';
+        }
+
+        $map['status'] = 0;
+
+        if (isset($params['title']) && !empty($params['title'])) {
+            $map['title'] = ['like','%'.$params['title'].'%'];
+        }
+        if (isset($params['author']) && !empty($params['author'])) {
+            $map['author'] = ['like','%'.$params['author'].'%'];
+        }
+
+        $db = $this->db;
+        $this->data['count'] = $db->where($map)->count();
+        $this->data['data'] = $db->where($map)->order($params['order'])->select();
         return $this->ajax($this->data);
     }
 }
