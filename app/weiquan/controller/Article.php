@@ -141,12 +141,13 @@ class Article extends Base
             $this->data['msg'] = '缺失类别';
             return $this->ajax($this->data);
         }
+        $map['cid'] = $params['cid'];
 
         if (!isset($params['order']) || empty($params['order'])) {
             $params['order'] = 'create_time desc';
         }
 
-        $map['status'] = 0;
+        $map['status'] = 1;
 
         if (isset($params['title']) && !empty($params['title'])) {
             $map['title'] = ['like','%'.$params['title'].'%'];

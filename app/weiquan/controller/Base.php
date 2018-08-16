@@ -16,11 +16,11 @@ class Base extends Controller
 
     protected function _initialize()
     {
-        // $this->user['web_info'] = $this->getWebInfo();
+        //$this->user['web_info'] = $this->getWebInfo();
         
-        // if ($this->auth()) {
-        //     return $this->redirect('/home');
-        // }
+        if ($this->auth()) {
+            
+        }
         $this->before();
     }
 
@@ -53,7 +53,7 @@ class Base extends Controller
     {
         $request = Request::instance();
         $this->request = [
-            'host' => $request->domain(),
+            'host' => $request->domain().'/server',
             'pathname' => $request->module().'/'.$request->controller().'/'.$request->action()
         ];
         return false;
