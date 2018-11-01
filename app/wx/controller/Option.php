@@ -2,62 +2,33 @@
 namespace app\wx\controller;
 use think\Db;
 
-class Article extends Base
+class Option extends Base
 {
     public function before()
 	{
-        $this->db = Db::name('article');
-        $this->options = Db::name('article_options');
+		$this->db = Db::name('article_options');
     }
     
-    public function add()
+    public function add($params)
     {   
-        $params = input('');
-        
-        $article = [];
-        if (!isset($params['user_id']) || empty($params['user_id'])) {
+        if (!isset($params['article_id']) || empty($params['article_id'])) {
             $this->data['code'] = 1001;
-            $this->data['msg'] = '未登陆';
+            $this->data['msg'] = '缺少关联主键';
             return $this->ajax($this->data);
-        } else {
-            $article['user_id'] = $params['user_id'];
         }
-        if (!isset($params['title']) || empty($params['title'])) {
-            $this->data['code'] = 1001;
-            $this->data['msg'] = '标题不能为空';
-            return $this->ajax($this->data);
-        } else {
-            $article['title'] = $params['title'];
-        }
-        if (!isset($params['options']) || empty($params['options'])) {
+        if (!isset($params['option_title']) || empty($params['option_title'])) {
             $this->data['code'] = 1001;
             $this->data['msg'] = '选项不能为空';
             return $this->ajax($this->data);
-        } else {
-            $params['options'] = json_decode($params['options']);
         }
-        if (!isset($params['author']) || empty($params['author'])) {
-            $params['author'] = '佚名';
-        } else {
-            $article['author'] = $params['author'];
-        }
-        $article['create_time'] = $this->now();
-        $article['update_time'] = $this->now();
-        $id = $this->db->insertGetId($article);
+
+        $id = $this->db->insert($params);
         if (!$id) {
             $this->data['code'] = 2001;
             return $this->ajax($this->data);
         }
+        
         $this->data['data'] = $this->db->where('id',$id)->find();
-
-        $option = new Option();
-        $options = $params['options'];
-        for ($i=0; $i < count($options); $i++) {
-            $item['article_id'] = $id;
-            $item['option_title'] = $options[$i]->option_title;
-            $option->add($item);
-        };
-        $this->data['data']['options'] = $options;
         return $this->ajax($this->data);
     }
 
