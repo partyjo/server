@@ -10,8 +10,11 @@ class Weixin extends Base
     protected function before()
     {
         $this->wxconfig = [
-            'appid' => '123456',
-            'appsecret' => '1214141'
+            'token'=>'djgrpqgxoev4kenryql2xnalpj31xwbe', //填写你设定的key
+            'encodingaeskey'=>'kNGLqvw7lAckfUsVSkvJBlmXcSYDNLILOlPtRdDg4VC', //填写加密用的EncodingAESKey
+            'appid'=>'wxcf412e90b8ebb48b', //填写高级调用功能的app id
+            'appsecret'=>'06a741b384532560fb58905c5a08ca55'
+            //'appsecret'=>'1a002a7818bc613e75b0d0224cc8250c' //填写高级调用功能的密钥
         ];
     }
 
@@ -71,7 +74,7 @@ class Weixin extends Base
         }
 
         $this->data['code'] = 9999;
-        $this->data['data'] = $this.getOauthUrl($url)
+        $this->data['data'] = $this->getOauthUrl($url);
         return $this->ajax($this->data);
     }
 

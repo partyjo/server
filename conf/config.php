@@ -9,7 +9,7 @@ return [
     'app_trace'              => $debug,
 
     // 开启路由
-    // 'url_route_on'           => true,
+    'url_route_on'           => false,
 
     // 视图输出字符串内容替换
     'view_replace_str' => [
