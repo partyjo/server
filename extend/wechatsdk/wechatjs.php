@@ -8,10 +8,12 @@ class WechatJs
 	private $appSecret;
 	private $url;
 
-	public function __construct($appId, $appSecret,$url) {
+	public function __construct($appId, $appSecret,$url, $prefix) {
 		$this->appId = $appId;
 		$this->appSecret = $appSecret;
 		$this->url = $url;
+		$this->jsapiTicket = $prefix.'jsapi_ticket.json';
+		$this->accessToken = $prefix.'access_token.json';
 	}
 
 	public function getSignPackage() {
@@ -29,7 +31,7 @@ class WechatJs
 			"signature" => $signature,
 			"rawString" => $string
 		);
-		return json($signPackage); 
+		return $signPackage;
 	}
 
 	private function createNonceStr($length = 16) {
@@ -43,7 +45,7 @@ class WechatJs
 
 	private function getJsApiTicket() {
 		// jsapi_ticket 应该全局存储与更新，以下代码以写入到文件中做示例
-		$data = json_decode(file_get_contents("jsapi_ticket.json"));
+		$data = json_decode(file_get_contents($this->jsapiTicket));
 		if ($data->expire_time < time()) {
 			$accessToken = $this->getAccessToken();
 			$url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi&access_token=$accessToken";
@@ -52,7 +54,7 @@ class WechatJs
 			if ($ticket) {
 				$data->expire_time = time() + 7000;
 				$data->jsapi_ticket = $ticket;
-				$fp = fopen("jsapi_ticket.json", "w");
+				$fp = fopen($this->jsapiTicket, "w");
 				fwrite($fp, json_encode($data));
 				fclose($fp);
 			}
@@ -64,7 +66,7 @@ class WechatJs
 
 	private function getAccessToken() {
 		// access_token 应该全局存储与更新，以下代码以写入到文件中做示例
-		$data = json_decode(file_get_contents("access_token.json"));
+		$data = json_decode(file_get_contents($this->accessToken));
 		if ($data->expire_time < time()) {
 			$url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=$this->appId&secret=$this->appSecret";
 			$res = json_decode($this->httpGet($url));
@@ -72,7 +74,7 @@ class WechatJs
 			if ($access_token) {
 				$data->expire_time = time() + 7000;
 				$data->access_token = $access_token;
-				$fp = fopen("access_token.json", "w");
+				$fp = fopen($this->accessToken, "w");
 				fwrite($fp, json_encode($data));
 				fclose($fp);
 			}

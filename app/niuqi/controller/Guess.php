@@ -64,18 +64,38 @@ class Guess extends Base
 
         $map['openid'] = $params['openid'];
         
-        $db = $this->db;
-        $this->data['data'] = $db->where($map)->find();
+        $res = $this->db->where($map)->find();
+        if ($res) {
+            $this->data['data'] = $res;
+        } else {
+            $this->data['code'] = 3001;
+        }
+        
         return $this->ajax($this->data);
     }
 
     public function page()
     {
+        $params = input('');
+        $map = [];
+        if (isset($params['amount'])) {
+            $map['amount'] = ['like', '{'.$params['amount'].'}%'];
+        }
+        $db = $this->db;
+        $this->data['count'] = $db->where($map)->count();
+        $this->data['data'] = $db->where($map)->order('create_time desc')->page($params['pageIndex'],$params['pageSize'])->select();
         return $this->ajax($this->data);
     }
 
-    public function all()
+    public function prize()
     {
+        $params = input('');
+        $map = [
+            'amount' => ['like', '{'.$params['amount'].'}%']
+        ];
+        $db = $this->db;
+        $this->data['count'] = $db->where($map)->count();
+        $this->data['data'] = $db->where($map)->order('create_time desc')->page($params['pageIndex'],$params['pageSize'])->select();
         return $this->ajax($this->data);
     }
 }

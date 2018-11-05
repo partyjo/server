@@ -2,6 +2,7 @@
 namespace app\niuqi\controller;
 use wechatsdk\wechat;
 use wechatsdk\wechatjs;
+use think\Db;
 
 class Weixin extends Base
 {
@@ -9,13 +10,7 @@ class Weixin extends Base
 
     protected function before()
     {
-        $this->wxconfig = [
-            'token'=>'djgrpqgxoev4kenryql2xnalpj31xwbe', //填写你设定的key
-            'encodingaeskey'=>'kNGLqvw7lAckfUsVSkvJBlmXcSYDNLILOlPtRdDg4VC', //填写加密用的EncodingAESKey
-            'appid'=>'wxcf412e90b8ebb48b', //填写高级调用功能的app id
-            'appsecret'=>'06a741b384532560fb58905c5a08ca55'
-            //'appsecret'=>'1a002a7818bc613e75b0d0224cc8250c' //填写高级调用功能的密钥
-        ];
+        $this->wxconfig = config('nqxt');
     }
 
     public function index()
@@ -27,7 +22,14 @@ class Weixin extends Base
     // 清理授权缓存
     public function clear()
     {
+        $token = $this->getToken();
+        if ($token) {
+            $db = Db::name('nq_guess');
+            $db->where(['openid' => $token['openid']])->delete();
+        }
         session('NQ_OAUTH_INFO',null);
+        $this->data['msg'] = '清除成功...';
+        return $this->ajax($this->data);
     }
 
     public function isLoginTest($url) {
@@ -35,7 +37,7 @@ class Weixin extends Base
         $token = [
             'openid' => '123456',
             'nickname' => 'zhangmin',
-            'headimgurl' => ''
+            'headimgurl' => 'http://cdn.duitang.com/uploads/item/201408/28/20140828142218_PS4fi.thumb.700_0.png'
         ];
         // $token = false;
         if ($token !== false) {
@@ -44,7 +46,7 @@ class Weixin extends Base
         }
 
         $this->data['code'] = 9999;
-        $this->data['data'] = 'http://'.$this->url['HTTP_HOST'].$this->url['ROOT'].'/weixin/wxOauthBackTest?url='.$url;
+        $this->data['data'] = 'http://partyjo.nextdog.cc/server/niuqi/weixin/wxOauthBackTest?url='.$url;
         return $this->ajax($this->data);
     }
 
@@ -55,7 +57,7 @@ class Weixin extends Base
         $token = [
             'openid' => '123456',
             'nickname' => 'zhangmin',
-            'headimgurl' => ''
+            'headimgurl' => 'http://cdn.duitang.com/uploads/item/201408/28/20140828142218_PS4fi.thumb.700_0.png'
         ];
         //session用户信息
         if ($token !== false){
@@ -67,8 +69,9 @@ class Weixin extends Base
 
     public function isLogin($url) {
         //获取授权用户信息
-        $token = $this->getWxUserInfo($this->wxconfig);
-        if ($token !== false) {
+        $token = $this->getToken();
+        if ($token) {
+            $this->setToken($token);
             $this->data['data'] = $token;
             return $this->ajax($this->data);
         }
@@ -82,7 +85,7 @@ class Weixin extends Base
     public function getOauthUrl($url)
     {
         $weObj = new Wechat($this->wxconfig);
-        $wxOauthUrl = 'http://'.$this->url['HTTP_HOST'].$this->url['ROOT'].'/weixin/wxoauthback?url='.$url;
+        $wxOauthUrl = 'http://partyjo.nextdog.cc/server/niuqi/weixin/wxoauthback?url='.$url;
         return $weObj->getOauthRedirect($wxOauthUrl,'niuqi');
     }
 
@@ -103,13 +106,15 @@ class Weixin extends Base
     public function getWxsdk($url)
     {
         //实例化微信sdk类
-        $WechatJs = new Wechatjs($this->wxconfig['appid'],$this->wxconfig['appsecret'],$url);
+        $WechatJs = new Wechatjs($this->wxconfig['appid'],$this->wxconfig['appsecret'],$url, 'niu_');
         //获取注册信息
         $json = $WechatJs->getSignPackage();
         if ($json !== false){
-            return $json;
+            $this->data['data'] = $json;
+            return $this->ajax($this->data);
         }
-        return false;
+        $this->data['code'] = 1001;
+        return $this->ajax($this->data);
     }
 
     // 获取授权用户信息
@@ -136,7 +141,12 @@ class Weixin extends Base
     // 缓存授权信息
     protected function setToken($token)
     {
-        return session('NQ_OAUTH_INFO',$token);
+        session('NQ_OAUTH_INFO',$token);
+    }
+
+    protected function getToken()
+    {
+        return session('NQ_OAUTH_INFO');
     }
 
 }
