@@ -2,11 +2,11 @@
 namespace app\niuqi\controller;
 use think\Db;
 
-class Guess extends Base
+class Help extends Base
 {
     public function before()
 	{
-		$this->db = Db::name('nq_guess');
+		$this->db = Db::name('nq_helper');
     }
     
     public function add()
@@ -19,9 +19,9 @@ class Guess extends Base
             return $this->ajax($this->data);
         }
 
-        if (!isset($params['mobile']) || strlen($params['mobile']) !== 11) {
+        if (!isset($params['userid']) || empty($params['userid'])) {
             $this->data['code'] = 1002;
-            $this->data['msg'] = '手机号格式不正确';
+            $this->data['msg'] = '助力用户不存在';
             return $this->ajax($this->data);
         }
         if (!isset($params['amount']) || empty($params['amount'])) {
@@ -78,40 +78,15 @@ class Guess extends Base
     {
         $params = input('');
         $map = [];
-        if (isset($params['amount'])) {
-            $map['amount'] = ['like', $params['amount'].'%'];
+        if (!isset($params['userid']) || empty($params['userid'])) {
+            $this->data['code'] = 1002;
+            $this->data['msg'] = '用户不存在';
+            return $this->ajax($this->data);
         }
+        $map['userid'] = $params['userid'];
         $db = $this->db;
         $this->data['count'] = $db->where($map)->count();
-        $this->data['data'] = $db->where($map)->order('create_time desc')->page($params['pageIndex'],$params['pageSize'])->select();
-        return $this->ajax($this->data);
-    }
-
-    public function prize()
-    {
-        $params = input('');
-        $map = [
-            'amount' => ['like', $params['amount'].'%']
-        ];
-        $db = $this->db;
-        // Db::table('tb_nq_guess')->alias('a')->join('tb_nq_helper b','a.id = w.artist_id','RIGHT')->select();
-        $this->data['count'] = $db->where($map)->count();
-        $this->data['data'] = $db->where($map)->order('create_time desc')->page($params['pageIndex'],$params['pageSize'])->select();
-        return $this->ajax($this->data);
-    }
-
-    public function all()
-    {
-        $params = input('');
-        $db = $this->db;
-        $res = Db::table('tb_nq_guess')->alias('a')->field('a.id,a.openid,a.nickname,a.mobile,a.amount, b.amount as hp_amout')->join('tb_nq_helper b','a.openid = b.userid','left')->fetchSql(false)->select();
-        $sum = count($res);
-        $data = [];
-        // for ($i=0; $i < $sum; $i++) { 
-        
-        // }
-        $this->data['count'] = $sum;
-        $this->data['data'] = $res;
+        $this->data['data'] = $db->where($map)->order('create_time desc')->select();
         return $this->ajax($this->data);
     }
 }
