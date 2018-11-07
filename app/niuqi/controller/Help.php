@@ -24,6 +24,37 @@ class Help extends Base
             $this->data['msg'] = '助力用户不存在';
             return $this->ajax($this->data);
         }
+
+        $fitter0['userid'] = $params['userid'];
+        $fitter0['openid'] = $params['openid'];
+        $count0 = $this->db->where($fitter0)->count();
+        if ($count0 >= 1) {
+            $this->data['code'] = 1002;
+            $this->data['msg'] = '您已经帮TA助力过了';
+            return $this->ajax($this->data);
+        }
+
+        $fitter1['userid'] = $params['userid'];
+        $count1 = $this->db->where($fitter1)->count();
+        if ($count1 == 10) {
+            $this->data['code'] = 1002;
+            $this->data['msg'] = '当前用户已满10次助力';
+            return $this->ajax($this->data);
+        }
+
+        $fitter2['openid'] = $params['openid'];
+        $count2 = $this->db->where($fitter2)->count();
+        if ($count2 >= 3) {
+            $this->data['code'] = 1002;
+            $this->data['msg'] = '您的助力机会已用完！';
+            return $this->ajax($this->data);
+        }
+        if ($params['openid'] === $params['userid']) {
+            $this->data['code'] = 1002;
+            $this->data['msg'] = '自己不能帮自己噢';
+            return $this->ajax($this->data);
+        }
+
         if (!isset($params['amount']) || empty($params['amount'])) {
             $this->data['code'] = 1002;
             $this->data['msg'] = '竞猜金额不能为空';
@@ -37,8 +68,8 @@ class Help extends Base
             $this->data['code'] = 2001;
             return $this->ajax($this->data);
         }
-        
-        $this->data['data'] = $this->db->where('id',$id)->find();
+        $this->data['msg'] = '助力成功!';
+        $this->data['data'] = $this->db->where('openid',$params['openid'])->find();
         return $this->ajax($this->data);
     }
 

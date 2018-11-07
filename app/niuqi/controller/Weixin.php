@@ -37,7 +37,7 @@ class Weixin extends Base
         $token = [
             'openid' => '123456',
             'nickname' => 'zhangmin',
-            'headimgurl' => 'http://cdn.duitang.com/uploads/item/201408/28/20140828142218_PS4fi.thumb.700_0.png'
+            'headimgurl' => 'http://thirdwx.qlogo.cn/mmopen/vi_32/FD2wpbUxb5bbVqeXiauxxhWwia5Y800ghwFicNwqQEYjjYD55aYQkwDOxzq3l90fACkdGQhjM88wfiabRO0LzEMziaQ/132'
         ];
         // $token = false;
         if ($token !== false) {
@@ -57,7 +57,7 @@ class Weixin extends Base
         $token = [
             'openid' => '123456',
             'nickname' => 'zhangmin',
-            'headimgurl' => 'http://cdn.duitang.com/uploads/item/201408/28/20140828142218_PS4fi.thumb.700_0.png'
+            'headimgurl' => 'http://thirdwx.qlogo.cn/mmopen/vi_32/FD2wpbUxb5bbVqeXiauxxhWwia5Y800ghwFicNwqQEYjjYD55aYQkwDOxzq3l90fACkdGQhjM88wfiabRO0LzEMziaQ/132'
         ];
         //session用户信息
         if ($token !== false){

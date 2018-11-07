@@ -38,7 +38,7 @@ class Guess extends Base
             return $this->ajax($this->data);
         }
         
-        $this->data['data'] = $this->db->where('id',$id)->find();
+        $this->data['data'] = $this->db->where('openid',$params['openid'])->find();
         return $this->ajax($this->data);
     }
 
@@ -55,14 +55,17 @@ class Guess extends Base
     public function get()
     {
         $params = input('');
+        $map = [];
 
-        if (!isset($params['openid']) || empty($params['openid'])) {
+        if (isset($params['openid']) && !empty($params['openid'])) {
+            $map['openid'] = $params['openid'];
+        } else if (isset($params['id']) && !empty($params['id'])) {
+            $map['id'] = $params['id'];
+        } else {
             $this->data['code'] = 1002;
             $this->data['msg'] = '用户不存在';
             return $this->ajax($this->data);
         }
-
-        $map['openid'] = $params['openid'];
         
         $res = $this->db->where($map)->find();
         if ($res) {
