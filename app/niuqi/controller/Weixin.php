@@ -26,6 +26,9 @@ class Weixin extends Base
         if ($token) {
             $db = Db::name('nq_guess');
             $db->where(['openid' => $token['openid']])->delete();
+            $db = Db::name('nq_helper');
+            $db->where(['userid' => $token['openid']])->delete();
+            $db->where(['openid' => $token['openid']])->delete();
         }
         session('NQ_OAUTH_INFO',null);
         $this->data['msg'] = '清除成功...';
