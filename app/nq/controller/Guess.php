@@ -103,17 +103,19 @@ class Guess extends Base
         return $this->ajax($this->data);
     }
 
+    public function users()
+    {
+        $params = input('');
+        $db = $this->db;
+        $this->data['data'] = $db->order('create_time desc')->page($params['pageIndex'],$params['pageSize'])->select();
+        return $this->ajax($this->data);
+    }
+
     public function all()
     {
         $params = input('');
         $db = $this->db;
-        $res = Db::table('tb_nq_guess')->alias('a')->field('a.id,a.openid,a.nickname,a.mobile,a.amount, b.amount as hp_amout')->join('tb_nq_helper b','a.openid = b.userid','left')->fetchSql(false)->select();
-        $sum = count($res);
-        $data = [];
-        // for ($i=0; $i < $sum; $i++) { 
-        
-        // }
-        $this->data['count'] = $sum;
+        $res = Db::table('tb_nq_guess')->alias('a')->field('a.id,a.openid,a.nickname,a.mobile,a.amount, b.amount as hp_amout')->join('tb_nq_helper b','a.openid = b.userid','left')->fetchSql(false)->page($params['pageIndex'],$params['pageSize'])->select();
         $this->data['data'] = $res;
         return $this->ajax($this->data);
     }
