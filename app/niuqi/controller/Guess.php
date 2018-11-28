@@ -13,6 +13,10 @@ class Guess extends Base
     {   
         $params = input('');
 
+        $this->data['code'] = 1002;
+        $this->data['msg'] = '活动已在20.00结束';
+        return $this->ajax($this->data);
+
         if (!isset($params['openid']) || !isset($params['nickname']) || !isset($params['headimgurl'])) {
             $this->data['code'] = 1002;
             $this->data['msg'] = '您还没有登录';
@@ -90,6 +94,16 @@ class Guess extends Base
         return $this->ajax($this->data);
     }
 
+    public function users()
+    {
+        $params = input('');
+        $db = $this->db;
+        // $this->data['data'] = $db->order('create_time desc')->page($params['pageIndex'],$params['pageSize'])->select();
+        $this->data['count'] = $db->count();
+        $this->data['helper'] = Db::table('tb_nq_helper')->count();
+        return $this->ajax($this->data);
+    }
+
     public function prize()
     {
         $params = input('');
@@ -107,7 +121,11 @@ class Guess extends Base
     {
         $params = input('');
         $db = $this->db;
-        $res = Db::table('tb_nq_guess')->alias('a')->field('a.id,a.openid,a.nickname,a.mobile,a.amount, b.amount as hp_amout')->join('tb_nq_helper b','a.openid = b.userid','left')->fetchSql(false)->page($params['pageIndex'],$params['pageSize'])->select();
+        $map = [];
+        // if ($params['amount']) {
+        //     $map['a.amout|b.amount'] = ['like', $params['amount'].'%'];
+        // }
+        $res = Db::table('tb_nq_guess')->alias('a')->field('a.id,a.openid,a.nickname,a.mobile,a.amount, b.amount as hp_amout')->join('tb_nq_helper b','a.openid = b.userid','left')->where($map)->page($params['pageIndex'],$params['pageSize'])->select();
         $this->data['data'] = $res;
         return $this->ajax($this->data);
     }

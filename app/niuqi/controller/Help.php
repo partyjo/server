@@ -13,6 +13,10 @@ class Help extends Base
     {   
         $params = input('');
 
+        $this->data['code'] = 1002;
+        $this->data['msg'] = '活动已在20.00结束';
+        return $this->ajax($this->data);
+
         if (!isset($params['openid']) || !isset($params['nickname']) || !isset($params['headimgurl'])) {
             $this->data['code'] = 1002;
             $this->data['msg'] = '您还没有登录';
