@@ -50,6 +50,7 @@ class Forms extends Base
 
     public function update()
     {
+        $res = $this->db->upate(input());
         return $this->ajax($this->data);
     }
 
